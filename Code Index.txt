@@ -1,0 +1,68 @@
+#Merge DataFrame by drugs
+mouse_merge_df = mouse_merge_df[(mouse_merge_df["Drug"] =='Stelasyn')|
+                                             (mouse_merge_df["Drug"] =='Naftisol')|
+                                              (mouse_merge_df["Drug"] =='Ketapril')|
+                                               (mouse_merge_df["Drug"] =='Capomulin')|
+                                                (mouse_merge_df["Drug"] =='Infubinol')|
+                                                 (mouse_merge_df["Drug"] =='Ceftamin')|
+                                                  (mouse_merge_df["Drug"] =='Propriva')|
+                                                   (mouse_merge_df["Drug"] =='Zoniferol')|
+                                                    
+                                                      (mouse_merge_df["Drug"] =='Ramicane')|
+                                                       (mouse_merge_df["Drug"] =='Pacebo')]
+______________________________________________________
+
+tumor_volume_mean = mouse_merge_df.groupby(["Drug","Timepoint"])["Tumor Volume (mm3)"].mean()
+
+# Convert to DataFrame
+mean_tumor_volume_df = pd.DataFrame(tumor_volume_mean).reset_index()
+
+# Preview DataFrame
+mean_tumor_volume_df
+_________________________________________________
+# Store the Standard Error of Tumor Volumes Grouped by Drug and Timepoint
+error_tumor_volume = mouse_merge_df.groupby(["Drug", "Timepoint"])['Tumor Volume (mm3)'].sem()
+
+# Convert to DataFrame
+error_tumor_volume_df = pd.DataFrame(error_tumor_volume).reset_index()
+
+# Preview DataFrame
+
+error_tumor_volume_df.head()
+
+# Minor Data Munging to Re-Format the Data Frames
+tumor_time_treatment = mean_tumor_volume_df.pivot_table('Tumor Volume (mm3)', ['Timepoint'],'Drug')
+tumor_volume = error_tumor_volume_df.pivot_table('Tumor Volume (mm3)', ['Timepoint'],'Drug')                                               
+
+# Preview that Reformatting worked
+tumor_volume.head()
+tumor_time_treatment.head()
+________________________________________________________________________
+
+# Generate the Plot (with Error Bars)
+drugs=["Capomulin", "Infubinol", "Ketapril", "Placebo"]
+markers={"Capomulin":'ro:', "Infubinol":'b^:', "Ketapril":'gs:', "Placebo":'kd:'}
+fig1, ax1 = plt.subplots()
+
+for x in drugs:
+    ax1.errorbar(tumor_time_treatment.index, tumor_time_treatment[x], tumor_volume[x], fmt = markers[x])
+ax1.legend()
+plt.grid(True)
+plt.title("Tumor Response to Treatment")
+plt.xlabel('Time (Days)')
+plt.ylabel('Tumor Volume (mm3)')
+
+# Save the Figure
+plt.savefig("Tumor Response to Treatment.png")
+# Show the Figure
+plt.show()
+
+
+
+
+
+
+
+
+
+
